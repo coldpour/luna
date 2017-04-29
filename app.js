@@ -1,40 +1,131 @@
 window.onload = function() {
-  function show_profile_info(profile) {
-    console.log(profile);
-    $.ajax({
-      method: "POST",
-      url: "https://prod-11.westus.logic.azure.com:443/workflows/93064f22a63d437094179cca949e362d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BJaHZL2tKHNyt3gRbhnZYKArW2SaTiT3q1rXZNqO2hw",
-      accepts: "application/json",
-      timeout: 5000,
-      success: function(data, textStatus, jqXHR) {
-        console.log("SUCCESS!!!", {
-          data, textStatus, jqXHR
-        });
-      },
-      error: function(jqXHR, textStatus, errorThrown) {
-        console.log("ERROR!!!", {
-          jqXHR, textStatus, errorThrown
-        });
-      }
-    });
+  const state = getInitialState();
+  document.body.innerHTML = renderState(state);
+};
+
+function renderState(state) {
+  if(!state) {
+    console.log('no state to render');
+    return "";
   }
 
-  var lock = new Auth0Lock('eofSdksBE6N1vxe8oUIoB8oJ1R50v1aM', 'lunaweb.auth0.com');
-  var btn_login = document.getElementById('btn-login');
+  console.log('rendering state', state);
+  return renderBoard(state.board);
+}
 
-  btn_login.addEventListener('click', function() {
-    lock.show();
-  });
+function renderBoard(board) {
+  if(!board) {
+    console.log('no board to render');
+    return "";
+  }
 
-  lock.on("authenticated", function(authResult) {
-    lock.getProfile(authResult.idToken, function(error, profile) {
-      if (error) {
-        // Handle error
-        return;
+  console.log('rendering board', board);
+  const b = `
+<div class="board" id="board|${board.id}">
+  ${renderColumns(board.columns, board.cards)}
+</div>
+`;
+  console.log('board', b);
+  return b;
+}
+
+function renderColumns(columns, cards) {
+  if(!columns) {
+    console.log('no columns to render');
+    return "";
+  }
+
+  console.log('rendering columns', columns);
+  return columns.reduce((acc, column) => {
+    return acc += renderColumn(column, cards.reduce((acc, card) => {
+      if(card.column === column.id) {
+        acc.push(card);
       }
-      localStorage.setItem('id_token', authResult.idToken);
+      return acc;
+    }, []));
+  }, "");
+}
 
-      show_profile_info(profile);
-    });
-  });
-};
+function renderColumn(column, cards) {
+  if(!column) {
+    console.log('no column to render');
+    return "";
+  }
+
+  console.log('rendering column', column);
+  const c = `
+<div class="column" id="col|${column.id}">
+  ${column.name}
+  ${renderCards(cards)}
+</div>
+`;
+  console.log('column', c);
+  return c;
+}
+
+function renderCards(cards) {
+  if(!cards) {
+    console.log('no cards to render');
+    return "";
+  }
+
+  console.log('rendering cards', cards);
+  return cards.reduce((acc, card) => {
+    return acc += renderCard(card);
+  }, "");
+}
+
+function renderCard(card) {
+  if(!card) {
+    console.log('no card to render');
+    return "";
+  }
+
+  console.log('rendering card', card);
+  const c = `
+<div class="card" id="card|${card.id}">
+  ${card.name}
+</div>
+`;
+  console.log('card', c);
+  return c;
+}
+
+function getInitialState() {
+  return {
+    user: {},
+    board: {
+      id: "0",
+      name: "stuff",
+      columns: [
+        {
+          id: "0",
+          name: "todo",
+          board: "0"
+        },
+        {
+          id: "1",
+          name: "doing",
+          board: "0"
+        }
+      ],
+      cards: [
+        {
+          id: "0",
+          name: "one",
+          column: "0"
+        },
+        {
+          id: "1",
+          name: "two",
+          column: "0"
+        },
+        {
+          id: "2",
+          name: "three",
+          column: "0"
+        }
+      ]
+    }
+  };
+}
