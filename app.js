@@ -1,6 +1,6 @@
 window.onload = function() {
   const state = getInitialState();
-  document.body.innerHTML = renderState(state);
+  document.getElementById('board-container').innerHTML = renderState(state);
 };
 
 function renderState(state) {
