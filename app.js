@@ -37,13 +37,15 @@ function renderColumns(columns, cards) {
 
   console.log('rendering columns', columns);
   return columns.reduce((acc, column) => {
-    return acc += renderColumn(column, cards.reduce((acc, card) => {
-      if(card.column === column.id) {
-        acc.push(card);
-      }
-      return acc;
-    }, []));
+    function cardBelongsInColumn(card) { return card.column === column.id; }
+    return acc += renderColumn(column, filter(cards, cardBelongsInColumn));
   }, "");
+}
+
+function filter(arr, pred) {
+  return arr.reduce((acc, cur) => {
+    return pred(cur) ? acc.concat([cur]) : acc;
+  }, []);
 }
 
 function renderColumn(column, cards) {
