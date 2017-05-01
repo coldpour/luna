@@ -2,11 +2,24 @@ const state = getInitialState();
 
 window.onload = renderApp;
 
-function foo(story_id) {
-    console.log(JSON.stringify(state, null, 2));
+function edit_story(story_id) {
     state.focused_story = String(story_id);
-    console.log(JSON.stringify(state, null, 2));
+    state.editing_story = String(story_id);
     renderApp();
+}
+
+function save_story(story_id, value) {
+  state.board.lists = state.board.lists.reduce((acc, list) => {
+    list.stories = list.stories.reduce((acc, story) => {
+      if (story.id === String(story_id)) {
+        story.name = value;
+      }
+      return acc.concat([story]);
+    }, []);
+    return acc.concat([list]);
+  }, []);
+  state.editing_story = undefined;
+  renderApp();
 }
 
 function renderApp() {
@@ -23,11 +36,12 @@ function renderState(state) {
 function renderBoard(board) {
     if (board) {
         const b = `
-      <div class="board" id="board|${board.id}">
-        <div class="name">${board.name}</div>
-        ${renderLists(board.lists)}
-      </div>
-    `;
+          <div class="board" id="board|${board.id}">
+            <div class="name">${board.name}</div>
+            ${renderLists(board.lists)}
+            <div class="create">Add a list...</div>
+          </div>
+        `;
         return b;
     }
     return "";
@@ -45,11 +59,12 @@ function renderLists(lists) {
 function renderList(list) {
     if (list) {
         const c = `
-      <div class="list" id="list|${list.id}">
-        <div class="name">${list.name}</div>
-        ${renderStories(list.stories)}
-      </div>
-    `;
+          <div class="list" id="list|${list.id}">
+            <div class="name">${list.name}</div>
+            ${renderStories(list.stories)}
+            <div class="create">Add a story...</div>
+          </div>
+        `;
         return c;
     }
     return "";
@@ -66,13 +81,17 @@ function renderStories(stories) {
 
 function renderStory(story) {
     if (story) {
-        const s = `
-      <div class="${getStoryClasses(story.id)}" id="story|${story.id}" onclick="foo(${story.id})">
-        ${story.name}
-      </div>
-    `;
-        console.log('story', s);
-        return s;
+      let s;
+      if (story.id === state.editing_story) {
+        s = `<input type="text" value="${story.name}" onblur="save_story(${story.id}, this.value)">`;
+      } else {
+        s = `
+          <div class="${getStoryClasses(story.id)}" id="story|${story.id}" onclick="edit_story(${story.id})">
+            ${story.name}
+          </div>
+        `;
+      }
+      return s;
     }
     return "";
 }
@@ -86,13 +105,14 @@ function getStoryClasses(id) {
 function getInitialState() {
     return {
         user: {},
+        editing_story: undefined,
         focused_story: undefined,
         board: {
             id: "0",
             name: "my board",
             lists: [{
                 "id": "1",
-                "board_id": "1",
+                "name": "todo",
                 "stories": [{
                     "id": "8",
                     "name": "make it work",
@@ -107,7 +127,7 @@ function getInitialState() {
                 "_ts": 1493591708
             }, {
                 "id": "2",
-                "board_id": "1",
+                "name": "doing",
                 "stories": [{
                     "id": "0",
                     "name": "fix the thing",
