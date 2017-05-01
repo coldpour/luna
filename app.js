@@ -1,121 +1,132 @@
-window.onload = function() {
-  const state = getInitialState();
-  document.getElementById('board-container').innerHTML = renderState(state);
+const state = getInitialState();
+
+window.onload = renderApp;
+
+function foo(story_id) {
+    console.log(JSON.stringify(state, null, 2));
+    state.focused_story = String(story_id);
+    console.log(JSON.stringify(state, null, 2));
+    renderApp();
+}
+
+function renderApp() {
+    document.getElementById('board-container').innerHTML = renderState(state);
 };
 
 function renderState(state) {
-  if(state) {
-    console.log('rendering state', state);
-    return renderBoard(state.board);
-  }
-  return "";
+    if (state) {
+        return renderBoard(state.board);
+    }
+    return "";
 }
 
 function renderBoard(board) {
-  if(board) {
-    console.log('rendering board', board);
-    const b = `
+    if (board) {
+        const b = `
       <div class="board" id="board|${board.id}">
-        ${renderColumns(board.columns, board.cards)}
+        <div class="name">${board.name}</div>
+        ${renderLists(board.lists)}
       </div>
     `;
-    console.log('board', b);
-    return b;
-  }
-
-  return "";
+        return b;
+    }
+    return "";
 }
 
-function renderColumns(columns, cards) {
-  if(columns) {
-    console.log('rendering columns', columns);
-    return columns.reduce((acc, column) => {
-      function cardBelongsInColumn(card) { return card.column === column.id; }
-      const cardsInColumn = cards.filter(cardBelongsInColumn);
-      return acc += renderColumn(column, cardsInColumn);
-    }, "");
-  }
-  return "";
+function renderLists(lists) {
+    if (lists) {
+        return lists.reduce((acc, list) => {
+            return acc += renderList(list);
+        }, "");
+    }
+    return "";
 }
 
-function renderColumn(column, cards) {
-  if(column) {
-    console.log('rendering column', column);
-    const c = `
-      <div class="column" id="col|${column.id}">
-        ${column.name}
-        ${renderCards(cards)}
+function renderList(list) {
+    if (list) {
+        const c = `
+      <div class="list" id="list|${list.id}">
+        <div class="name">${list.name}</div>
+        ${renderStories(list.stories)}
       </div>
     `;
-    console.log('column', c);
-    return c;
-  }
-  return "";
+        return c;
+    }
+    return "";
 }
 
-function renderCards(cards) {
-  if(cards) {
-    console.log('rendering cards', cards);
-    return cards.reduce((acc, card) => {
-      return acc += renderCard(card);
-    }, "");
-  }
-  return "";
+function renderStories(stories) {
+    if (stories) {
+        return stories.reduce((acc, story) => {
+            return acc += renderStory(story);
+        }, "");
+    }
+    return "";
 }
 
-function renderCard(card) {
-  if(card) {
-    console.log('rendering card', card);
-    const c = `
-      <div class="card" id="card|${card.id}" onclick="foo()">
-        ${card.name}
+function renderStory(story) {
+    if (story) {
+        const s = `
+      <div class="${getStoryClasses(story.id)}" id="story|${story.id}" onclick="foo(${story.id})">
+        ${story.name}
       </div>
     `;
-    console.log('card', c);
-    return c;
-  }
-  return "";
+        console.log('story', s);
+        return s;
+    }
+    return "";
 }
 
-function foo() {
-  console.log();
+function getStoryClasses(id) {
+    console.log('focus?', id, id === state.focused_story);
+    const cls = "story";
+    return id === state.focused_story ? cls + " focused" : cls;
 }
 
 function getInitialState() {
-  return {
-    user: {},
-    board: {
-      id: "0",
-      name: "stuff",
-      columns: [
-        {
-          id: "0",
-          name: "todo",
-          board: "0"
-        },
-        {
-          id: "1",
-          name: "doing",
-          board: "0"
+    return {
+        user: {},
+        focused_story: undefined,
+        board: {
+            id: "0",
+            name: "my board",
+            lists: [{
+                "id": "1",
+                "board_id": "1",
+                "stories": [{
+                    "id": "8",
+                    "name": "make it work",
+                    "description": "Another Story Town",
+                    "estimate": 13,
+                    "user_ids": []
+                }],
+                "_rid": "ll0PAPH95QAOAAAAAAAAAA==",
+                "_self": "dbs/ll0PAA==/colls/ll0PAPH95QA=/docs/ll0PAPH95QAOAAAAAAAAAA==/",
+                "_etag": "\"01005ff2-0000-0000-0000-5906669a0000\"",
+                "_attachments": "attachments/",
+                "_ts": 1493591708
+            }, {
+                "id": "2",
+                "board_id": "1",
+                "stories": [{
+                    "id": "0",
+                    "name": "fix the thing",
+                    "description": "Another Story Town",
+                    "estimate": 13,
+                    "user_ids": []
+                }, {
+                    "id": "5",
+                    "name": "test it good so that you know if it's working cause then it will be good and working and not broken so that the users will be happy and come back and recomend it to their friends and their wives and their wives friends will use it to keep track of stuff too",
+                    "description": "Another Story Town",
+                    "estimate": 13,
+                    "user_ids": []
+                }],
+                "_rid": "ll0PAPH95QAQAAAAAAAAAA==",
+                "_self": "dbs/ll0PAA==/colls/ll0PAPH95QA=/docs/ll0PAPH95QAQAAAAAAAAAA==/",
+                "_etag": "\"01005ef2-0000-0000-0000-5906669a0000\"",
+                "_attachments": "attachments/",
+                "_ts": 1493591708
+            }]
         }
-      ],
-      cards: [
-        {
-          id: "0",
-          name: "one",
-          column: "0"
-        },
-        {
-          id: "1",
-          name: "two",
-          column: "0"
-        },
-        {
-          id: "2",
-          name: "three",
-          column: "0"
-        }
-      ]
-    }
-  };
+    };
 }
