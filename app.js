@@ -39,7 +39,7 @@ function renderBoard(board) {
           <div class="board" id="board|${board.id}">
             <div class="name">${board.name}</div>
             ${renderLists(board.lists)}
-            <div class="create">Add a list...</div>
+            <div class="create list">Add a list...</div>
           </div>
         `;
         return b;
@@ -62,7 +62,7 @@ function renderList(list) {
           <div class="list" id="list|${list.id}">
             <div class="name">${list.name}</div>
             ${renderStories(list.stories)}
-            <div class="create">Add a story...</div>
+            <div class="create story">Add a story...</div>
           </div>
         `;
         return c;
