@@ -1,0 +1,4 @@
+#! /bin/bash
+
+python -m SimpleHTTPServer 4123
+#open http://localhost:4123
